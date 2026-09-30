@@ -1,11 +1,11 @@
 spring:
-  application:
-    name: enterprise-erp
-
   datasource:
     url: jdbc:mysql://localhost:3306/enterprise_erp
     username: root
     password: mysql@123
+
+  flyway:
+    enabled: true
 
   jpa:
     hibernate:
@@ -14,6 +14,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  application:
+    name: enterprise-erp
 
 server:
   port: 8080
