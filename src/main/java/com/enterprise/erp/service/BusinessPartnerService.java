@@ -14,6 +14,14 @@ public class BusinessPartnerService {
     }
 
     public BusinessPartner createBusinessPartner(BusinessPartner businessPartner){
+
+        if(businessPartnerRepository.existsByPartnerCode(
+                businessPartner.getPartnerCode())){
+            throw new IllegalArgumentException(
+                    "Business partner code already exists:"
+                    + businessPartner.getPartnerCode());
+
+        }
         return businessPartnerRepository.save(businessPartner);
     }
 }
