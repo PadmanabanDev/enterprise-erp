@@ -3,7 +3,9 @@ package com.enterprise.erp.mapper;
 import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
 import com.enterprise.erp.entity.BusinessPartner;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BusinessPartnerMapper {
 
     //BusinessPartnerRequest DTO -> BusinessPartner Entity
