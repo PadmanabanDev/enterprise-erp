@@ -22,6 +22,7 @@ public class BusinessPartnerService {
         this.businessPartnerMapper = businessPartnerMapper;
     }
 
+    //Create BusinessPartner
     public BusinessPartnerResponse createBusinessPartner(
             BusinessPartnerRequest request) {
 
