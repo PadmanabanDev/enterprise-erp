@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/enterprise_erp
-    username: root
-    password: mysql@123
+    url: jdbc:mysql://mysql-15e470e4-padmanabhan1997-b6f9.b.aivencloud.com:12499/enterprise_erp?sslmode=require
+    username: avnadmin
+    password: ${DB_PASSWORD}
 
   flyway:
     enabled: true
