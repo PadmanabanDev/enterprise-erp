@@ -7,4 +7,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/business-partners")
 public class BusinessPartnerController {
 
+    private final BusinessPartnerService businessPartnerService;
+
+    public BusinessPartnerController(BusinessPartnerService businessPartnerService){
+        this.businessPartnerService = businessPartnerService;
+    }
 }
