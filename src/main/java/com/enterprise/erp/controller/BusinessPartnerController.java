@@ -1,0 +1,10 @@
+package com.enterprise.erp.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/business-partners")
+public class BusinessPartnerController {
+
+}
