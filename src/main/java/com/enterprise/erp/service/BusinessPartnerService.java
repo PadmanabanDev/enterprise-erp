@@ -3,6 +3,7 @@ package com.enterprise.erp.service;
 import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
 import com.enterprise.erp.entity.BusinessPartner;
+import com.enterprise.erp.exception.BusinessPartnerAlreadyExistsException;
 import com.enterprise.erp.mapper.BusinessPartnerMapper;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,10 @@ public class BusinessPartnerService {
         if (businessPartnerRepository.existsByPartnerCode(
                 businessPartner.getPartnerCode())) {
 
-            throw new IllegalArgumentException(
+            throw new BusinessPartnerAlreadyExistsException(
                     "Business partner code already exists: "
-                            + businessPartner.getPartnerCode());
+                        + businessPartner.getPartnerCode()
+            );
         }
 
         BusinessPartner savedBusinessPartner =

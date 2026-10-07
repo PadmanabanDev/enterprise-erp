@@ -24,6 +24,7 @@ public class BusinessPartnerRequest {
 
     @Size(max = 20)
     private String phone;
+
     public String getPartnerCode() {
         return partnerCode;
     }
