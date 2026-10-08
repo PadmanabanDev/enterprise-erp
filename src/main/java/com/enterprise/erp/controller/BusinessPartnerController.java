@@ -4,10 +4,9 @@ import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
 import com.enterprise.erp.service.BusinessPartnerService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/business-partners")
@@ -24,5 +23,10 @@ public class BusinessPartnerController {
            @Valid @RequestBody BusinessPartnerRequest request
             ){
         return businessPartnerService.createBusinessPartner(request);
+    }
+
+    @GetMapping
+    public List<BusinessPartnerResponse> getAllBusinessPartners(){
+        return businessPartnerService.getAllBusinessPartners();
     }
 }
