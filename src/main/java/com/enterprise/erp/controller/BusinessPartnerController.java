@@ -29,4 +29,12 @@ public class BusinessPartnerController {
     public List<BusinessPartnerResponse> getAllBusinessPartners(){
         return businessPartnerService.getAllBusinessPartners();
     }
+
+
+    @GetMapping("/{partnerCode}")
+    public BusinessPartnerResponse getBusinessPartnerByCode(
+            @PathVariable String partnerCode) {
+
+        return businessPartnerService.getBusinessPartnerByCode(partnerCode);
+    }
 }

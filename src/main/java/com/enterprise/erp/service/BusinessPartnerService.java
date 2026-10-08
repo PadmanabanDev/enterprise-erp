@@ -4,6 +4,7 @@ import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
 import com.enterprise.erp.entity.BusinessPartner;
 import com.enterprise.erp.exception.BusinessPartnerAlreadyExistsException;
+import com.enterprise.erp.exception.BusinessPartnerNotFoundException;
 import com.enterprise.erp.mapper.BusinessPartnerMapper;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import org.springframework.stereotype.Service;
@@ -53,5 +54,17 @@ public class BusinessPartnerService {
         return  businessPartners.stream()
                 .map(businessPartnerMapper::toResponse)
                 .toList();
+    }
+
+
+    public BusinessPartnerResponse getBusinessPartnerByCode(String partnerCode){
+
+        BusinessPartner businessPartner = businessPartnerRepository.findByPartnerCode(partnerCode)
+                .orElseThrow(()->
+                        new BusinessPartnerNotFoundException(
+                                "Business partner not found: "
+                                + partnerCode
+                        ));
+        return  businessPartnerMapper.toResponse(businessPartner);
     }
 }
