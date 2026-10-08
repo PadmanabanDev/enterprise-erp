@@ -2,6 +2,7 @@ package com.enterprise.erp.controller;
 
 import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
+import com.enterprise.erp.dto.BusinessPartnerUpdateRequest;
 import com.enterprise.erp.service.BusinessPartnerService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +37,15 @@ public class BusinessPartnerController {
             @PathVariable String partnerCode) {
 
         return businessPartnerService.getBusinessPartnerByCode(partnerCode);
+    }
+
+    @PutMapping("/{partnerCode}")
+    public BusinessPartnerResponse updateBusinessPartner(
+            @PathVariable String partnerCode,
+            @Valid @RequestBody BusinessPartnerUpdateRequest request
+            ){
+        return businessPartnerService.updateBusinessPartner(
+                partnerCode,request
+        );
     }
 }

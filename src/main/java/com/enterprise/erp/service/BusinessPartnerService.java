@@ -2,6 +2,7 @@ package com.enterprise.erp.service;
 
 import com.enterprise.erp.dto.BusinessPartnerRequest;
 import com.enterprise.erp.dto.BusinessPartnerResponse;
+import com.enterprise.erp.dto.BusinessPartnerUpdateRequest;
 import com.enterprise.erp.entity.BusinessPartner;
 import com.enterprise.erp.exception.BusinessPartnerAlreadyExistsException;
 import com.enterprise.erp.exception.BusinessPartnerNotFoundException;
@@ -57,6 +58,7 @@ public class BusinessPartnerService {
     }
 
 
+    //Get Business Partner by findByPartnerCode
     public BusinessPartnerResponse getBusinessPartnerByCode(String partnerCode){
 
         BusinessPartner businessPartner = businessPartnerRepository.findByPartnerCode(partnerCode)
@@ -66,5 +68,25 @@ public class BusinessPartnerService {
                                 + partnerCode
                         ));
         return  businessPartnerMapper.toResponse(businessPartner);
+    }
+
+    //Update Business Partner data
+
+    public BusinessPartnerResponse updateBusinessPartner(
+            String partnerCode, BusinessPartnerUpdateRequest request ){
+
+            BusinessPartner businessPartner = businessPartnerRepository.findByPartnerCode(partnerCode)
+                    .orElseThrow(()-> new BusinessPartnerNotFoundException(
+                            "Business partner not found: " + partnerCode
+                    ));
+
+            businessPartner.setPartnerType(request.getPartnerType());
+            businessPartner.setName(request.getName());
+            businessPartner.setEmail(request.getEmail());
+            businessPartner.setPhone(request.getPhone());
+
+            BusinessPartner updateBusinessPartner = businessPartnerRepository.save(businessPartner);
+
+            return  businessPartnerMapper.toResponse(updateBusinessPartner);
     }
 }
