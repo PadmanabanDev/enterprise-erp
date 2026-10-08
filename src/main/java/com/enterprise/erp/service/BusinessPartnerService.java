@@ -8,6 +8,8 @@ import com.enterprise.erp.mapper.BusinessPartnerMapper;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class BusinessPartnerService {
@@ -43,5 +45,13 @@ public class BusinessPartnerService {
                 businessPartnerRepository.save(businessPartner);
 
         return businessPartnerMapper.toResponse(savedBusinessPartner);
+    }
+
+    //Get all Business partner
+    public List<BusinessPartnerResponse> getAllBusinessPartners(){
+        List<BusinessPartner> businessPartners = businessPartnerRepository.findAll();
+        return  businessPartners.stream()
+                .map(businessPartnerMapper::toResponse)
+                .toList();
     }
 }
