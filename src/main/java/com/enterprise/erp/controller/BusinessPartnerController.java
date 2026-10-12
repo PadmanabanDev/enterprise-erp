@@ -58,4 +58,5 @@ public class BusinessPartnerController {
 
         return ResponseEntity.noContent().build();
     }
+
 }
