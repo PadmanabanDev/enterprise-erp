@@ -5,6 +5,7 @@ import com.enterprise.erp.dto.BusinessPartnerResponse;
 import com.enterprise.erp.dto.BusinessPartnerUpdateRequest;
 import com.enterprise.erp.service.BusinessPartnerService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,5 +48,14 @@ public class BusinessPartnerController {
         return businessPartnerService.updateBusinessPartner(
                 partnerCode,request
         );
+    }
+
+    @DeleteMapping("/{partnerCode}")
+    public ResponseEntity<Void> deleteBusinessPartner(
+                @PathVariable String partnerCode
+                ){
+        businessPartnerService.deleteBusinessPartner(partnerCode);
+
+        return ResponseEntity.noContent().build();
     }
 }

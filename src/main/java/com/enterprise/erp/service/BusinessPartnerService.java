@@ -89,4 +89,15 @@ public class BusinessPartnerService {
 
             return  businessPartnerMapper.toResponse(updateBusinessPartner);
     }
+
+    //Delete BusinessPartner record
+    public void deleteBusinessPartner(String partnerCode){
+        BusinessPartner businessPartner = businessPartnerRepository
+                .findByPartnerCode(partnerCode)
+                .orElseThrow(()-> new BusinessPartnerNotFoundException(
+                        "Business Partner Not found: "+partnerCode
+                ));
+        businessPartnerRepository.delete(businessPartner);
+
+    }
 }
