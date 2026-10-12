@@ -2,6 +2,7 @@ package com.enterprise.erp.service;
 
 import com.enterprise.erp.dto.MaterialRequest;
 import com.enterprise.erp.dto.MaterialResponse;
+import com.enterprise.erp.dto.MaterialUpdateRequest;
 import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.exception.DuplicateMaterialException;
 import com.enterprise.erp.exception.MaterialNotFoundException;
@@ -55,5 +56,36 @@ public class MaterialService {
                        ));
         return  materialMapper.toResponse(material);
     }
+
+    //Update Material Record
+    public MaterialResponse updateMaterial(
+            String materialCode, MaterialUpdateRequest request
+    ){
+        Material material = materialRepository.findByMaterialCode(materialCode)
+                .orElseThrow(()-> new MaterialNotFoundException(
+                        "Material not Found: "+ materialCode
+                ));
+
+        material.setDescription(request.getDescription());
+        material.setMaterialType(request.getMaterialType());
+        material.setBaseUnit(request.getBaseUnit());
+
+        Material updatedMaterial  = materialRepository.save(material);
+
+        return materialMapper.toResponse(updatedMaterial );
+    }
+
+    //Delete material
+    public void deleteMaterial(String materialCode) {
+
+        Material material = materialRepository
+                .findByMaterialCode(materialCode)
+                .orElseThrow(() -> new MaterialNotFoundException(
+                        "Material code not found: " + materialCode
+                ));
+
+        materialRepository.delete(material);
+    }
+
 
 }

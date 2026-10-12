@@ -65,4 +65,40 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
     }
+
+    @ExceptionHandler(DuplicateMaterialException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateMaterial(
+            DuplicateMaterialException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(MaterialNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaterialNotFound(
+            MaterialNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(errorResponse);
+    }
 }
