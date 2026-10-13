@@ -2,6 +2,7 @@ package com.enterprise.erp.service;
 
 import com.enterprise.erp.dto.PlantRequest;
 import com.enterprise.erp.dto.PlantResponse;
+import com.enterprise.erp.dto.PlantUpdateRequest;
 import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.exception.DuplicatePlantException;
 import com.enterprise.erp.exception.PlantNotFoundException;
@@ -54,4 +55,41 @@ public class PlantService {
                                 "Plant code not found: "+ plantCode));
         return plantMapper.toResponse(plant);
     }
+
+    //Update Plant Record
+    public PlantResponse updatePlant(
+            String plantCode,
+            PlantUpdateRequest request) {
+
+        // 1. Find the existing plant
+        Plant plant = plantRepository.findByPlantCode(plantCode)
+                .orElseThrow(() -> new PlantNotFoundException(
+                        "Plant not found with code: " + plantCode
+                ));
+
+        // 2. Update the permitted fields
+        plant.setPlantName(request.getPlantName());
+        plant.setCity(request.getCity());
+        plant.setCountry(request.getCountry());
+
+        // 3. Save the updated plant
+        Plant updatedPlant = plantRepository.save(plant);
+
+        // 4. Convert entity to response DTO
+        return plantMapper.toResponse(updatedPlant);
+    }
+
+    //Delete Plant record
+
+    public void deletePlant(String plantCode) {
+
+        Plant plant = plantRepository.findByPlantCode(plantCode)
+                .orElseThrow(() -> new PlantNotFoundException(
+                        "Plant not found with code: " + plantCode
+                ));
+
+        plantRepository.delete(plant);
+    }
+
+
 }
