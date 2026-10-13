@@ -4,6 +4,7 @@ import com.enterprise.erp.dto.PlantRequest;
 import com.enterprise.erp.dto.PlantResponse;
 import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.exception.DuplicatePlantException;
+import com.enterprise.erp.exception.PlantNotFoundException;
 import com.enterprise.erp.mapper.PlantMapper;
 import com.enterprise.erp.repository.PlantRepository;
 import org.springframework.stereotype.Service;
