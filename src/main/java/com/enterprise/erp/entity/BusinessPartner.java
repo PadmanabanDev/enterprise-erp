@@ -4,9 +4,16 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.PrePersist;
+
 @Entity
 @Table(name="business_partner")
 public class BusinessPartner {
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
