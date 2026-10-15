@@ -175,5 +175,21 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(DuplicateInventoryException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateInventory(
+            DuplicateInventoryException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 
 }
