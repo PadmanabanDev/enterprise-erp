@@ -1,11 +1,13 @@
 package com.enterprise.erp.service;
 
+import com.enterprise.erp.dto.InventoryQuantityUpdateRequest;
 import com.enterprise.erp.dto.InventoryRequest;
 import com.enterprise.erp.dto.InventoryResponse;
 import com.enterprise.erp.entity.Inventory;
 import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.entity.StorageLocation;
 import com.enterprise.erp.exception.DuplicateInventoryException;
+import com.enterprise.erp.exception.InventoryNotFoundException;
 import com.enterprise.erp.exception.MaterialNotFoundException;
 import com.enterprise.erp.exception.StorageLocationNotFoundException;
 import com.enterprise.erp.mapper.InventoryMapper;
@@ -96,5 +98,24 @@ public class InventoryService {
                 .map(inventoryMapper::toResponse)
                 .toList();
     }
+
+
+
+    @Transactional
+    public InventoryResponse updateInventoryQuantity(
+            Long inventoryId,
+            InventoryQuantityUpdateRequest request) {
+
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new InventoryNotFoundException(
+                        "Inventory not found with id: " + inventoryId));
+
+        inventory.setQuantity(request.getQuantity());
+
+        Inventory updatedInventory = inventoryRepository.save(inventory);
+
+        return inventoryMapper.toResponse(updatedInventory);
+    }
+
 }
 
