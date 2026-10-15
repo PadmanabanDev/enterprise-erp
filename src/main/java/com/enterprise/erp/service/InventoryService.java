@@ -117,5 +117,18 @@ public class InventoryService {
         return inventoryMapper.toResponse(updatedInventory);
     }
 
+
+    //Get inventory by ID
+    @Transactional(readOnly = true)
+    public InventoryResponse getInventoryById(Long inventoryId) {
+
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new InventoryNotFoundException(
+                        "Inventory not found with id: " + inventoryId));
+
+        return inventoryMapper.toResponse(inventory);
+    }
+
+
 }
 

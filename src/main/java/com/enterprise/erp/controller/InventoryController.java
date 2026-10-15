@@ -53,4 +53,12 @@ public class InventoryController {
                 inventoryId, request);
     }
 
+
+    @GetMapping("/{inventoryId}")
+    public InventoryResponse getInventoryById(
+            @PathVariable Long inventoryId) {
+
+        return inventoryService.getInventoryById(inventoryId);
+    }
+
 }
