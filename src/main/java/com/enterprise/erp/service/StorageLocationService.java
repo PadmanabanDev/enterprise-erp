@@ -1,6 +1,7 @@
 package com.enterprise.erp.service;
 
 import com.enterprise.erp.exception.DuplicateStorageLocationException;
+import com.enterprise.erp.exception.StorageLocationNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import com.enterprise.erp.dto.StorageLocationRequest;
 import com.enterprise.erp.dto.StorageLocationResponse;
@@ -75,4 +76,21 @@ public class StorageLocationService {
                 .map(storageLocationMapper::toResponse)
                 .toList();
     }
+
+
+    @Transactional(readOnly = true)
+    public StorageLocationResponse getStorageLocationByPlantAndCode(
+            String plantCode,
+            String storageLocationCode) {
+
+        StorageLocation storageLocation = storageLocationRepository
+                .findByPlant_PlantCodeAndStorageLocationCode(
+                        plantCode, storageLocationCode)
+                .orElseThrow(() -> new StorageLocationNotFoundException(
+                        "Storage location " + storageLocationCode
+                                + " not found in plant " + plantCode));
+
+        return storageLocationMapper.toResponse(storageLocation);
+    }
+
 }

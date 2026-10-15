@@ -33,4 +33,15 @@ public class StorageLocationController {
 
         return storageLocationService.getStorageLocationsByPlant(plantCode);
     }
+
+
+    @GetMapping("/plant/{plantCode}/{storageLocationCode}")
+    public StorageLocationResponse getStorageLocationByPlantAndCode(
+            @PathVariable String plantCode,
+            @PathVariable String storageLocationCode) {
+
+        return storageLocationService.getStorageLocationByPlantAndCode(
+                plantCode, storageLocationCode);
+    }
+
 }

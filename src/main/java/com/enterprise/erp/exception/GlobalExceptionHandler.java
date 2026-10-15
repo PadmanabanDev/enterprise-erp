@@ -158,4 +158,22 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(StorageLocationNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleStorageLocationNotFound(
+            StorageLocationNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+
 }

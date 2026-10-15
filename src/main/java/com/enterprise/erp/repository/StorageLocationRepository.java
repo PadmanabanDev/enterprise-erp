@@ -22,4 +22,6 @@ public interface StorageLocationRepository
             String plantCode,
             String storageLocationCode
     );
+
+    //
 }
