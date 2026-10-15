@@ -1,6 +1,7 @@
 
 package com.enterprise.erp.controller;
 
+import com.enterprise.erp.dto.InventoryQuantityUpdateRequest;
 import com.enterprise.erp.dto.InventoryRequest;
 import com.enterprise.erp.dto.InventoryResponse;
 import com.enterprise.erp.service.InventoryService;
@@ -41,4 +42,15 @@ public class InventoryController {
 
         return inventoryService.getInventoryByMaterial(materialCode);
     }
+
+
+    @PutMapping("/{inventoryId}/quantity")
+    public InventoryResponse updateInventoryQuantity(
+            @PathVariable Long inventoryId,
+            @Valid @RequestBody InventoryQuantityUpdateRequest request) {
+
+        return inventoryService.updateInventoryQuantity(
+                inventoryId, request);
+    }
+
 }
