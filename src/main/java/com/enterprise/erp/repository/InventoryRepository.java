@@ -23,4 +23,11 @@ public interface InventoryRepository extends
             Long materialId,
             Long storageLocationId
     );
+
+
+    Optional<Inventory> findByMaterial_IdAndStorageLocation_Id(
+            Long materialId,
+            Long storageLocationId
+    );
+
 }

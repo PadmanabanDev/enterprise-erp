@@ -208,52 +208,201 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+
     @ExceptionHandler(DuplicatePurchaseOrderException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicatePurchaseOrder(
-            DuplicatePurchaseOrderException ex) {
+            DuplicatePurchaseOrderException ex,
+            HttpServletRequest request) {
 
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
-                "Conflict",
+                HttpStatus.CONFLICT.getReasonPhrase(),
                 ex.getMessage(),
-                null
+                request.getRequestURI()
         );
 
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+
 
 
     @ExceptionHandler(PurchaseOrderNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handlePurchaseOrderNotFound(
-            PurchaseOrderNotFoundException ex) {
+            PurchaseOrderNotFoundException ex,
+            HttpServletRequest request) {
 
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
                 ex.getMessage(),
-                null
+                request.getRequestURI()
         );
 
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
 
 
     @ExceptionHandler(InvalidPurchaseOrderStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidPurchaseOrderStatus(
-            InvalidPurchaseOrderStatusException ex) {
+            InvalidPurchaseOrderStatusException ex,
+            HttpServletRequest request) {
 
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
-                "Conflict",
+                HttpStatus.CONFLICT.getReasonPhrase(),
                 ex.getMessage(),
-                null
+                request.getRequestURI()
         );
 
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+
+
+    @ExceptionHandler(DuplicateGoodsReceiptException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateGoodsReceipt(
+            DuplicateGoodsReceiptException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+
+
+    @ExceptionHandler(GoodsReceiptNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGoodsReceiptNotFound(
+            GoodsReceiptNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+    @ExceptionHandler(ExcessGoodsReceiptQuantityException.class)
+    public ResponseEntity<ApiErrorResponse> handleExcessGoodsReceiptQuantity(
+            ExcessGoodsReceiptQuantityException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+    @ExceptionHandler(GoodsReceiptPlantMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleGoodsReceiptPlantMismatch(
+            GoodsReceiptPlantMismatchException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+
+    @ExceptionHandler(DuplicateGoodsReceiptItemException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateGoodsReceiptItem(
+            DuplicateGoodsReceiptItemException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+    @ExceptionHandler(PurchaseOrderItemNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePurchaseOrderItemNotFound(
+            PurchaseOrderItemNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+    @ExceptionHandler(PurchaseOrderItemMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handlePurchaseOrderItemMismatch(
+            PurchaseOrderItemMismatchException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpectedException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                "An unexpected error occurred. Please try again later.",
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
 
 
 }

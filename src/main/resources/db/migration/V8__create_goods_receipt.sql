@@ -38,3 +38,4 @@ CREATE TABLE goods_receipt_item (
                                     CONSTRAINT chk_gr_received_quantity
                                         CHECK (received_quantity > 0)
 );
+
