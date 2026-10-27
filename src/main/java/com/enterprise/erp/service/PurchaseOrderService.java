@@ -3,6 +3,7 @@ package com.enterprise.erp.service;
 
 import com.enterprise.erp.dto.PurchaseOrderRequest;
 import com.enterprise.erp.dto.PurchaseOrderResponse;
+import com.enterprise.erp.dto.PurchaseOrderStatusUpdateRequest;
 import com.enterprise.erp.entity.BusinessPartner;
 import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.entity.Plant;
@@ -111,5 +112,34 @@ public class PurchaseOrderService {
                 .map(purchaseOrderMapper::toResponse)
                 .toList();
     }
+
+
+    @Transactional
+    public PurchaseOrderResponse updatePurchaseOrderStatus(
+            String orderNumber,
+            PurchaseOrderStatusUpdateRequest request) {
+
+        PurchaseOrder purchaseOrder = purchaseOrderRepository
+                .findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new PurchaseOrderNotFoundException(
+                        "Purchase order not found: " + orderNumber));
+
+        String currentStatus = purchaseOrder.getStatus();
+        String newStatus = request.getStatus();
+
+        if (!"CREATED".equals(currentStatus)) {
+            throw new InvalidPurchaseOrderStatusException(
+                    "Only purchase orders with CREATED status can be updated. "
+                            + "Current status: " + currentStatus);
+        }
+
+        purchaseOrder.setStatus(newStatus);
+
+        PurchaseOrder savedOrder =
+                purchaseOrderRepository.save(purchaseOrder);
+
+        return purchaseOrderMapper.toResponse(savedOrder);
+    }
+
 
 }

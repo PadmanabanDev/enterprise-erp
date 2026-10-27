@@ -240,4 +240,20 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(InvalidPurchaseOrderStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPurchaseOrderStatus(
+            InvalidPurchaseOrderStatusException ex) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+
 }
