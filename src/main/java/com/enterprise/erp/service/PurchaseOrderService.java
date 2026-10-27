@@ -8,9 +8,7 @@ import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.entity.PurchaseOrder;
 import com.enterprise.erp.entity.PurchaseOrderItem;
-import com.enterprise.erp.exception.BusinessPartnerNotFoundException;
-import com.enterprise.erp.exception.MaterialNotFoundException;
-import com.enterprise.erp.exception.PlantNotFoundException;
+import com.enterprise.erp.exception.*;
 import com.enterprise.erp.mapper.PurchaseOrderMapper;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import com.enterprise.erp.repository.MaterialRepository;
@@ -19,6 +17,8 @@ import com.enterprise.erp.repository.PurchaseOrderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -37,7 +37,7 @@ public class PurchaseOrderService {
 
         // 1. Check whether the order number already exists
         if (purchaseOrderRepository.existsByOrderNumber(request.getOrderNumber())) {
-            throw new IllegalArgumentException(
+            throw new DuplicatePurchaseOrderException(
                     "Purchase order already exists: " + request.getOrderNumber());
         }
 
@@ -90,4 +90,26 @@ public class PurchaseOrderService {
         // 8. Convert the saved entity into the API response
         return purchaseOrderMapper.toResponse(savedOrder);
     }
+
+
+    @Transactional(readOnly = true)
+    public PurchaseOrderResponse getPurchaseOrderByOrderNumber(
+            String orderNumber) {
+
+        PurchaseOrder purchaseOrder = purchaseOrderRepository
+                .findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new PurchaseOrderNotFoundException(
+                        "Purchase order not found: " + orderNumber));
+
+        return purchaseOrderMapper.toResponse(purchaseOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PurchaseOrderResponse> getAllPurchaseOrders() {
+        return purchaseOrderRepository.findAll()
+                .stream()
+                .map(purchaseOrderMapper::toResponse)
+                .toList();
+    }
+
 }

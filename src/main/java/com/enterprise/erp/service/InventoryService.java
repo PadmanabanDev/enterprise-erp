@@ -129,6 +129,13 @@ public class InventoryService {
         return inventoryMapper.toResponse(inventory);
     }
 
+    public List<InventoryResponse> getAllInventory() {
+        return inventoryRepository.findAll()
+                .stream()
+                .map(inventoryMapper::toResponse)
+                .toList();
+    }
+
 
 }
 

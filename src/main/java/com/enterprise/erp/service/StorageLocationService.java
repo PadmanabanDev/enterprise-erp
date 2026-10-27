@@ -93,4 +93,11 @@ public class StorageLocationService {
         return storageLocationMapper.toResponse(storageLocation);
     }
 
+    public List<StorageLocationResponse> getAllStorageLocations() {
+        return storageLocationRepository.findAll()
+                .stream()
+                .map(storageLocationMapper::toResponse)
+                .toList();
+    }
+
 }

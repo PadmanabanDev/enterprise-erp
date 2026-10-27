@@ -208,5 +208,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(DuplicatePurchaseOrderException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicatePurchaseOrder(
+            DuplicatePurchaseOrderException ex) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(PurchaseOrderNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePurchaseOrderNotFound(
+            PurchaseOrderNotFoundException ex) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
 
 }

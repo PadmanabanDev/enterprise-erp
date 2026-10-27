@@ -6,6 +6,7 @@ import com.enterprise.erp.dto.InventoryRequest;
 import com.enterprise.erp.dto.InventoryResponse;
 import com.enterprise.erp.service.InventoryService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,6 +60,14 @@ public class InventoryController {
             @PathVariable Long inventoryId) {
 
         return inventoryService.getInventoryById(inventoryId);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<InventoryResponse>> getAllInventory() {
+        List<InventoryResponse> inventoryList =
+                inventoryService.getAllInventory();
+
+        return ResponseEntity.ok(inventoryList);
     }
 
 }

@@ -5,6 +5,7 @@ import com.enterprise.erp.dto.StorageLocationRequest;
 import com.enterprise.erp.dto.StorageLocationResponse;
 import com.enterprise.erp.service.StorageLocationService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,4 +45,11 @@ public class StorageLocationController {
                 plantCode, storageLocationCode);
     }
 
+    @GetMapping
+    public ResponseEntity<List<StorageLocationResponse>> getAllStorageLocations() {
+        List<StorageLocationResponse> locations =
+                storageLocationService.getAllStorageLocations();
+
+        return ResponseEntity.ok(locations);
+    }
 }
