@@ -3,16 +3,9 @@ package com.enterprise.erp.service;
 
 import com.enterprise.erp.dto.CreateSalesOrderRequest;
 import com.enterprise.erp.dto.SalesOrderResponse;
-import com.enterprise.erp.entity.BusinessPartner;
-import com.enterprise.erp.entity.Material;
-import com.enterprise.erp.entity.Plant;
-import com.enterprise.erp.entity.SalesOrder;
-import com.enterprise.erp.entity.SalesOrderItem;
+import com.enterprise.erp.entity.*;
 import com.enterprise.erp.exception.*;
-import com.enterprise.erp.repository.BusinessPartnerRepository;
-import com.enterprise.erp.repository.MaterialRepository;
-import com.enterprise.erp.repository.PlantRepository;
-import com.enterprise.erp.repository.SalesOrderRepository;
+import com.enterprise.erp.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,29 +25,44 @@ public class SalesOrderService {
     private final BusinessPartnerRepository businessPartnerRepository;
     private final MaterialRepository materialRepository;
     private final PlantRepository plantRepository;
+    private final StorageLocationRepository storageLocationRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Transactional
-    public SalesOrderResponse createSalesOrder(CreateSalesOrderRequest request) {
+    public SalesOrderResponse createSalesOrder(
+            CreateSalesOrderRequest request) {
 
-        if (salesOrderRepository.existsByOrderNumber(request.orderNumber())) {
-            throw new DuplicateSalesOrderException (
-                    "Sales order already exists: " + request.orderNumber());
+        // 1. Check for duplicate order number
+        if (salesOrderRepository.existsByOrderNumber(
+                request.orderNumber())) {
+            throw new DuplicateSalesOrderException(
+                    "Sales order already exists: "
+                            + request.orderNumber());
         }
 
+        // 2. Find and validate customer
         BusinessPartner customer = businessPartnerRepository
                 .findByPartnerCode(request.customerCode())
                 .orElseThrow(() -> new SalesOrderCustomerNotFoundException(
-                        "Customer not found: " + request.customerCode()));
+                        "Customer not found: "
+                                + request.customerCode()));
 
         if (!"CUSTOMER".equalsIgnoreCase(customer.getPartnerType())) {
             throw new InvalidSalesOrderCustomerException(
-                    "Business partner is not a customer: " + request.customerCode());
+                    "Business partner is not a customer: "
+                            + request.customerCode());
         }
 
-        Plant plant = plantRepository.findByPlantCode(request.plantCode())
+        // 3. Find plant
+        Plant plant = plantRepository
+                .findByPlantCode(request.plantCode())
                 .orElseThrow(() -> new SalesOrderPlantNotFoundException(
                         "Plant not found: " + request.plantCode()));
 
+        // 4. Validate combined inventory demand before building the order
+        validateInventoryAvailability(request);
+
+        // 5. Create sales order
         SalesOrder salesOrder = new SalesOrder();
         salesOrder.setOrderNumber(request.orderNumber());
         salesOrder.setCustomer(customer);
@@ -63,15 +73,18 @@ public class SalesOrderService {
         BigDecimal orderTotal = BigDecimal.ZERO;
         List<SalesOrderItem> items = new ArrayList<>();
 
+        // 6. Build order items and calculate totals
         for (CreateSalesOrderRequest.SalesOrderItemRequest itemRequest
                 : request.items()) {
 
             Material material = materialRepository
                     .findByMaterialCode(itemRequest.materialCode())
                     .orElseThrow(() -> new SalesOrderMaterialNotFoundException(
-                            "Material not found: " + itemRequest.materialCode()));
+                            "Material not found: "
+                                    + itemRequest.materialCode()));
 
             BigDecimal quantity = itemRequest.orderedQuantity();
+
             BigDecimal unitPrice = itemRequest.unitPrice()
                     .setScale(2, RoundingMode.HALF_UP);
 
@@ -91,6 +104,7 @@ public class SalesOrderService {
 
         salesOrder.setTotalAmount(
                 orderTotal.setScale(2, RoundingMode.HALF_UP));
+
         salesOrder.getItems().addAll(items);
 
         SalesOrder savedOrder = salesOrderRepository.save(salesOrder);
@@ -98,18 +112,81 @@ public class SalesOrderService {
         return toResponse(savedOrder);
     }
 
+    // Calculate stock across all storage locations belonging to the plant
+    private BigDecimal getAvailableQuantity(
+            String materialCode,
+            String plantCode) {
+
+        List<StorageLocation> storageLocations =
+                storageLocationRepository
+                        .findByPlant_PlantCode(plantCode);
+
+        BigDecimal availableQuantity = BigDecimal.ZERO;
+
+        for (StorageLocation location : storageLocations) {
+
+            var inventory = inventoryRepository
+                    .findByMaterial_MaterialCodeAndStorageLocation_Id(
+                            materialCode,
+                            location.getId());
+
+            if (inventory.isPresent()) {
+                availableQuantity = availableQuantity.add(
+                        inventory.get().getQuantity());
+            }
+        }
+
+        return availableQuantity;
+    }
+
+    // Combine repeated material lines before checking available stock
+    private void validateInventoryAvailability(
+            CreateSalesOrderRequest request) {
+
+        Map<String, BigDecimal> requestedQuantities =
+                new LinkedHashMap<>();
+
+        for (CreateSalesOrderRequest.SalesOrderItemRequest item
+                : request.items()) {
+
+            requestedQuantities.merge(
+                    item.materialCode(),
+                    item.orderedQuantity(),
+                    BigDecimal::add);
+        }
+
+        for (Map.Entry<String, BigDecimal> entry
+                : requestedQuantities.entrySet()) {
+
+            String materialCode = entry.getKey();
+            BigDecimal totalRequested = entry.getValue();
+
+            BigDecimal availableQuantity = getAvailableQuantity(
+                    materialCode,
+                    request.plantCode());
+
+            if (availableQuantity.compareTo(totalRequested) < 0) {
+                throw new InsufficientInventoryException(
+                        "Insufficient inventory for material: "
+                                + materialCode
+                                + ". Available: " + availableQuantity
+                                + ", requested: " + totalRequested);
+            }
+        }
+    }
+
     private SalesOrderResponse toResponse(SalesOrder order) {
 
         List<SalesOrderResponse.SalesOrderItemResponse> itemResponses =
                 order.getItems().stream()
-                        .map(item -> new SalesOrderResponse.SalesOrderItemResponse(
-                                item.getId(),
-                                item.getMaterial().getMaterialCode(),
-                                item.getMaterial().getDescription(),
-                                item.getOrderedQuantity(),
-                                item.getUnitPrice(),
-                                item.getLineTotal()
-                        ))
+                        .map(item ->
+                                new SalesOrderResponse.SalesOrderItemResponse(
+                                        item.getId(),
+                                        item.getMaterial().getMaterialCode(),
+                                        item.getMaterial().getDescription(),
+                                        item.getOrderedQuantity(),
+                                        item.getUnitPrice(),
+                                        item.getLineTotal()))
                         .toList();
 
         return new SalesOrderResponse(
@@ -122,12 +199,12 @@ public class SalesOrderService {
                 order.getStatus(),
                 order.getOrderDate(),
                 order.getTotalAmount(),
-                itemResponses
-        );
+                itemResponses);
     }
 
     @Transactional
-    public SalesOrderResponse getSalesOrderByOrderNumber(String orderNumber) {
+    public SalesOrderResponse getSalesOrderByOrderNumber(
+            String orderNumber) {
 
         SalesOrder order = salesOrderRepository
                 .findByOrderNumber(orderNumber)
@@ -144,7 +221,6 @@ public class SalesOrderService {
                 .map(this::toResponse)
                 .toList();
     }
-
 
     @Transactional
     public SalesOrderResponse updateSalesOrderStatus(
@@ -174,8 +250,6 @@ public class SalesOrderService {
         return toResponse(savedOrder);
     }
 
-
-
     @Transactional
     public SalesOrderResponse cancelSalesOrder(String orderNumber) {
 
@@ -198,6 +272,4 @@ public class SalesOrderService {
 
         return toResponse(savedOrder);
     }
-
-
 }
