@@ -59,6 +59,16 @@ public class SalesOrderService {
                 .orElseThrow(() -> new SalesOrderPlantNotFoundException(
                         "Plant not found: " + request.plantCode()));
 
+        for (CreateSalesOrderRequest.SalesOrderItemRequest itemRequest : request.items()) {
+            if (materialRepository.findByMaterialCode(itemRequest.materialCode()).isEmpty()) {
+                throw new SalesOrderMaterialNotFoundException(
+                        "Material not found: " + itemRequest.materialCode()
+                );
+            }
+        }
+
+        validateInventoryAvailability(request);
+
         // 4. Validate combined inventory demand before building the order
         validateInventoryAvailability(request);
 
