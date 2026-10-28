@@ -63,4 +63,16 @@ public class SalesOrderController {
         return ResponseEntity.ok(response);
     }
 
+
+    @PatchMapping("/{orderNumber}/cancel")
+    public ResponseEntity<SalesOrderResponse> cancelSalesOrder(
+            @PathVariable String orderNumber) {
+
+        SalesOrderResponse response =
+                salesOrderService.cancelSalesOrder(orderNumber);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }

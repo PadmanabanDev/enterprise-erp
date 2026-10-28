@@ -9,6 +9,7 @@ import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.entity.SalesOrder;
 import com.enterprise.erp.entity.SalesOrderItem;
 import com.enterprise.erp.exception.InvalidSalesOrderStatusException;
+import com.enterprise.erp.exception.SalesOrderNotFoundException;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import com.enterprise.erp.repository.MaterialRepository;
 import com.enterprise.erp.repository.PlantRepository;
@@ -131,7 +132,7 @@ public class SalesOrderService {
 
         SalesOrder order = salesOrderRepository
                 .findByOrderNumber(orderNumber)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new SalesOrderNotFoundException(
                         "Sales order not found: " + orderNumber));
 
         return toResponse(order);
@@ -153,7 +154,7 @@ public class SalesOrderService {
 
         SalesOrder order = salesOrderRepository
                 .findByOrderNumber(orderNumber)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new SalesOrderNotFoundException(
                         "Sales order not found: " + orderNumber));
 
         if (!"CREATED".equals(order.getStatus())) {
@@ -173,5 +174,31 @@ public class SalesOrderService {
 
         return toResponse(savedOrder);
     }
+
+
+
+    @Transactional
+    public SalesOrderResponse cancelSalesOrder(String orderNumber) {
+
+        SalesOrder order = salesOrderRepository
+                .findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new SalesOrderNotFoundException(
+                        "Sales order not found: " + orderNumber));
+
+        if (!"CREATED".equals(order.getStatus())
+                && !"CONFIRMED".equals(order.getStatus())) {
+            throw new InvalidSalesOrderStatusException(
+                    "Only sales orders with CREATED or CONFIRMED status "
+                            + "can be cancelled. Current status: "
+                            + order.getStatus());
+        }
+
+        order.setStatus("CANCELLED");
+
+        SalesOrder savedOrder = salesOrderRepository.save(order);
+
+        return toResponse(savedOrder);
+    }
+
 
 }
