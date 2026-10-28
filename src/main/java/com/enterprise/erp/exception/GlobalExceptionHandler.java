@@ -405,4 +405,23 @@ public class GlobalExceptionHandler {
 
 
 
+    @ExceptionHandler(InvalidSalesOrderStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSalesOrderStatus(
+            InvalidSalesOrderStatusException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+
+
+
 }
