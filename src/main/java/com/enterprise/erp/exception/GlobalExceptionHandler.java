@@ -440,5 +440,38 @@ public class GlobalExceptionHandler {
 
 
 
+    @ExceptionHandler(InvalidSalesOrderCustomerException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSalesOrderCustomer(
+            InvalidSalesOrderCustomerException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+
+    @ExceptionHandler(SalesOrderPlantNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleSalesOrderPlantNotFound(
+            SalesOrderPlantNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 
 }

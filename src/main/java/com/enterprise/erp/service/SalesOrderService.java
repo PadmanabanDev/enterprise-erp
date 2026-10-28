@@ -8,8 +8,10 @@ import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.entity.SalesOrder;
 import com.enterprise.erp.entity.SalesOrderItem;
+import com.enterprise.erp.exception.InvalidSalesOrderCustomerException;
 import com.enterprise.erp.exception.InvalidSalesOrderStatusException;
 import com.enterprise.erp.exception.SalesOrderNotFoundException;
+import com.enterprise.erp.exception.SalesOrderPlantNotFoundException;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import com.enterprise.erp.repository.MaterialRepository;
 import com.enterprise.erp.repository.PlantRepository;
@@ -42,16 +44,16 @@ public class SalesOrderService {
 
         BusinessPartner customer = businessPartnerRepository
                 .findByPartnerCode(request.customerCode())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Business partner not found: " + request.customerCode()));
+                .orElseThrow(() -> new InvalidSalesOrderCustomerException(
+                        "Customer not found: " + request.customerCode()));
 
         if (!"CUSTOMER".equalsIgnoreCase(customer.getPartnerType())) {
-            throw new IllegalArgumentException(
+            throw new InvalidSalesOrderCustomerException(
                     "Business partner is not a customer: " + request.customerCode());
         }
 
         Plant plant = plantRepository.findByPlantCode(request.plantCode())
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new SalesOrderPlantNotFoundException(
                         "Plant not found: " + request.plantCode()));
 
         SalesOrder salesOrder = new SalesOrder();
