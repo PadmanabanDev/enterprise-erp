@@ -555,5 +555,72 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    // Return 404 when the requested delivery does not exist.
+    @ExceptionHandler(DeliveryNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleDeliveryNotFound(
+            DeliveryNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // Return 409 when a delivery number already exists.
+    @ExceptionHandler(DuplicateDeliveryException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateDelivery(
+            DuplicateDeliveryException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // Return 400 when a delivery violates a business rule.
+    @ExceptionHandler(InvalidDeliveryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidDelivery(
+            InvalidDeliveryException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Return 409 when the selected storage location lacks sufficient stock.
+    @ExceptionHandler(InsufficientDeliveryInventoryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInsufficientDeliveryInventory(
+            InsufficientDeliveryInventoryException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse error = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 
 }
