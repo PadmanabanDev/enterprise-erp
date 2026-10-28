@@ -41,7 +41,7 @@ public class SalesOrderService {
 
         BusinessPartner customer = businessPartnerRepository
                 .findByPartnerCode(request.customerCode())
-                .orElseThrow(() -> new InvalidSalesOrderCustomerException(
+                .orElseThrow(() -> new SalesOrderCustomerNotFoundException(
                         "Customer not found: " + request.customerCode()));
 
         if (!"CUSTOMER".equalsIgnoreCase(customer.getPartnerType())) {
