@@ -23,5 +23,10 @@ public interface StorageLocationRepository
             String storageLocationCode
     );
 
-    //
+    // Find a storage location by its code within a specific plant.
+    Optional<StorageLocation> findByStorageLocationCodeAndPlant_PlantCode(
+            String storageLocationCode,
+            String plantCode
+    );
+
 }
