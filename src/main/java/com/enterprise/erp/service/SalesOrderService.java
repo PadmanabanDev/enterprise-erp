@@ -8,10 +8,7 @@ import com.enterprise.erp.entity.Material;
 import com.enterprise.erp.entity.Plant;
 import com.enterprise.erp.entity.SalesOrder;
 import com.enterprise.erp.entity.SalesOrderItem;
-import com.enterprise.erp.exception.InvalidSalesOrderCustomerException;
-import com.enterprise.erp.exception.InvalidSalesOrderStatusException;
-import com.enterprise.erp.exception.SalesOrderNotFoundException;
-import com.enterprise.erp.exception.SalesOrderPlantNotFoundException;
+import com.enterprise.erp.exception.*;
 import com.enterprise.erp.repository.BusinessPartnerRepository;
 import com.enterprise.erp.repository.MaterialRepository;
 import com.enterprise.erp.repository.PlantRepository;
@@ -38,7 +35,7 @@ public class SalesOrderService {
     public SalesOrderResponse createSalesOrder(CreateSalesOrderRequest request) {
 
         if (salesOrderRepository.existsByOrderNumber(request.orderNumber())) {
-            throw new IllegalArgumentException(
+            throw new DuplicateSalesOrderException (
                     "Sales order already exists: " + request.orderNumber());
         }
 
@@ -71,7 +68,7 @@ public class SalesOrderService {
 
             Material material = materialRepository
                     .findByMaterialCode(itemRequest.materialCode())
-                    .orElseThrow(() -> new IllegalArgumentException(
+                    .orElseThrow(() -> new SalesOrderMaterialNotFoundException(
                             "Material not found: " + itemRequest.materialCode()));
 
             BigDecimal quantity = itemRequest.orderedQuantity();
