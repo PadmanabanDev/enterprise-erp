@@ -25,6 +25,7 @@ public class DeliveryService {
     private final OutboundDeliveryItemRepository deliveryItemRepository;
     private final StorageLocationRepository storageLocationRepository;
     private final InventoryRepository inventoryRepository;
+    private record InventoryKey(Long materialId, Long locationId) {}
 
     // Create a delivery after validating the order, quantities, locations, and stock.
     @Transactional
@@ -224,4 +225,146 @@ public class DeliveryService {
                 delivery.getUpdatedAt(),
                 items);
     }
+
+    @Transactional
+    public DeliveryResponse postGoodsIssue(String deliveryNumber) {
+
+        // 1. Find the delivery.
+        OutboundDelivery delivery = deliveryRepository
+                .findByDeliveryNumber(deliveryNumber)
+                .orElseThrow(() -> new DeliveryNotFoundException(
+                        "Delivery not found: " + deliveryNumber
+                ));
+
+        // 2. Only CREATED deliveries can be posted.
+        if (!"CREATED".equals(delivery.getStatus())) {
+            throw new InvalidDeliveryException(
+                    "Goods issue can only be posted for CREATED deliveries. "
+                            + "Current status: " + delivery.getStatus()
+            );
+        }
+
+        // 3. Aggregate quantities by material and storage location.
+        Map<InventoryKey, BigDecimal> requiredQuantities =
+                new LinkedHashMap<>();
+
+        for (OutboundDeliveryItem item : delivery.getItems()) {
+
+            InventoryKey key = new InventoryKey(
+                    item.getMaterial().getId(),
+                    item.getStorageLocation().getId()
+            );
+
+            requiredQuantities.merge(
+                    key,
+                    item.getDeliveredQuantity(),
+                    BigDecimal::add
+            );
+        }
+
+        // 4. Sort inventory keys to reduce the risk of deadlocks.
+        List<InventoryKey> sortedKeys = new ArrayList<>(
+                requiredQuantities.keySet()
+        );
+
+        sortedKeys.sort(
+                java.util.Comparator
+                        .comparing(InventoryKey::materialId)
+                        .thenComparing(InventoryKey::locationId)
+        );
+
+        // 5. Lock all required inventory rows.
+        Map<InventoryKey, Inventory> lockedInventory =
+                new LinkedHashMap<>();
+
+        for (InventoryKey key : sortedKeys) {
+
+            Inventory inventory = inventoryRepository
+                    .findByMaterialAndLocationForUpdate(
+                            key.materialId(),
+                            key.locationId()
+                    )
+                    .orElseThrow(() ->
+                            new InsufficientDeliveryInventoryException(
+                                    "No inventory record exists for material ID "
+                                            + key.materialId()
+                                            + " at storage location ID "
+                                            + key.locationId()
+                            )
+                    );
+
+            lockedInventory.put(key, inventory);
+        }
+
+        // 6. Validate every required quantity before changing any stock.
+        for (InventoryKey key : sortedKeys) {
+
+            Inventory inventory = lockedInventory.get(key);
+            BigDecimal requiredQuantity = requiredQuantities.get(key);
+
+            if (inventory.getQuantity().compareTo(requiredQuantity) < 0) {
+                throw new InsufficientDeliveryInventoryException(
+                        "Insufficient inventory for material ID "
+                                + key.materialId()
+                                + " at storage location ID "
+                                + key.locationId()
+                                + ". Available: "
+                                + inventory.getQuantity()
+                                + ", required: "
+                                + requiredQuantity
+                );
+            }
+        }
+
+        // 7. Deduct inventory after all validations pass.
+        for (InventoryKey key : sortedKeys) {
+
+            Inventory inventory = lockedInventory.get(key);
+            BigDecimal requiredQuantity = requiredQuantities.get(key);
+
+            inventory.setQuantity(
+                    inventory.getQuantity().subtract(requiredQuantity)
+            );
+        }
+
+        // 8. Mark the delivery as POSTED.
+        delivery.setStatus("POSTED");
+
+        // 9. Save and return the updated delivery.
+        OutboundDelivery savedDelivery =
+                deliveryRepository.save(delivery);
+
+        return toResponse(savedDelivery);
+    }
+
+
+    @Transactional
+    public DeliveryResponse cancelDelivery(String deliveryNumber) {
+
+        // 1. Find the delivery.
+        OutboundDelivery delivery = deliveryRepository
+                .findByDeliveryNumber(deliveryNumber)
+                .orElseThrow(() -> new DeliveryNotFoundException(
+                        "Delivery not found: " + deliveryNumber
+                ));
+
+        // 2. Only CREATED deliveries can be cancelled.
+        if (!"CREATED".equals(delivery.getStatus())) {
+            throw new InvalidDeliveryException(
+                    "Only CREATED deliveries can be cancelled. "
+                            + "Current status: " + delivery.getStatus()
+            );
+        }
+
+        // 3. Update the delivery status.
+        delivery.setStatus("CANCELLED");
+
+        // 4. Save the updated delivery.
+        OutboundDelivery cancelledDelivery =
+                deliveryRepository.save(delivery);
+
+        // 5. Return the updated response.
+        return toResponse(cancelledDelivery);
+    }
+
 }

@@ -38,4 +38,18 @@ public class DeliveryController {
     public List<DeliveryResponse> getAllDeliveries() {
         return deliveryService.getAllDeliveries();
     }
+
+    // Post goods issue and deduct the delivered quantities from inventory.
+    @PostMapping("/{deliveryNumber}/goods-issue")
+    public DeliveryResponse postGoodsIssue(
+            @PathVariable String deliveryNumber) {
+        return deliveryService.postGoodsIssue(deliveryNumber);
+    }
+
+    @PatchMapping("/{deliveryNumber}/cancel")
+    public DeliveryResponse cancelDelivery(
+            @PathVariable String deliveryNumber) {
+
+        return deliveryService.cancelDelivery(deliveryNumber);
+    }
 }
